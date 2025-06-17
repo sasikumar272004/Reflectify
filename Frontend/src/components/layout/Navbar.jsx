@@ -12,8 +12,7 @@ const sections = [
   { id: "emotional-analysis", label: "Emotion AI",  },
   { id: "expense-insights", label: "Finance Cortex",  },
   { id: "transformation", label: "Mind Journey",  },
-  { id: "testimonials", label: "Testimonials",  },
-  { id: "cta", label: "Get Started", }
+ 
 ];
 
 const Navbar = ({
@@ -200,81 +199,18 @@ const Navbar = ({
         </div>
 
         {/* Profile and Mobile Menu */}
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="cursor-pointer relative"
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-            >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#141414] to-[#3b3937] flex items-center justify-center shadow-lg">
-                <FiUser className="text-white text-lg" />
-              </div>
-              
-              {isProfileOpen && (
-                <motion.div 
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-black/80"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring" }}
-                />
-              )}
-            </motion.div>
-
-            <AnimatePresence>
-              {isProfileOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  className="absolute right-0 mt-3 w-56 bg-gray-900/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 z-50 overflow-hidden"
-                >
-                  <div className="p-4 border-b border-white/10">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
-                        <FiUser className="text-white text-lg" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">My Profile</p>
-                        <p className="text-xs text-white/60">Premium Member</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={handleProfileClick}
-                    className="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors flex items-center text-white/90"
-                  >
-                    <FaUserCircle className="mr-3 text-white/70" />
-                    Profile
-                  </button>
-                  
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors flex items-center text-white/90"
-                  >
-                    <FiLogOut className="mr-3 text-white/70" />
-                    Disconnect
-                  </button>
-                  
-                  <div className="px-4 py-2 border-t border-white/10 text-xs text-white/50">
-                    v2.4.8 • Neural Mode
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <motion.button
-            onClick={() => setIsMenuOpen(true)}
-            className="lg:hidden text-2xl text-white p-2 rounded-full bg-white/10 backdrop-blur-sm"
-            whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.2)" }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <RiMentalHealthFill className="text-white" />
-          </motion.button>
-        </div>
+        <div className="relative">
+  <motion.div
+    whileHover={{ scale: 1.1 }}
+    whileTap={{ scale: 0.9 }}
+    className="cursor-pointer"
+    onClick={handleProfileClick}
+  >
+    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#141414] to-[#3b3937] flex items-center justify-center shadow-lg">
+      <FiUser className="text-white text-lg" />
+    </div>
+  </motion.div>
+</div>
       </div>
     </motion.nav>
   );

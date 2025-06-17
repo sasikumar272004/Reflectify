@@ -6,25 +6,27 @@ import FloatingBlob from "../common/FloatingBlob";
 
 const EmotionalAnalysis = ({ navigate }) => {
   return (
-    <section id="emotional-analysis" className="min-h-screen relative bg-gradient-to-b from-[#d4e2e5]  via-[#f2f7fb] to-[#e8f3f5] overflow-hidden">
+    <section id="emotional-analysis" className="min-h-screen relative bg-[#E2C2FF]  overflow-hidden">
       {/* Background SVG Animations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Wave 1 */}
-        <motion.svg 
-          viewBox="0 0 500 50" 
-          className="absolute top-[15%] left-0 w-full opacity-10"
-          initial={{ x: -100 }}
-          whileInView={{ x: 0 }}
-          transition={{ duration: 20, ease: "linear", repeat: Infinity }}
-        >
-          <motion.path 
-            d="M0,25 C150,5 250,45 500,25" 
-            stroke="#7c3aed" 
-            strokeWidth="1.5" 
-            fill="none"
-            strokeDasharray="10 5"
-          />
-        </motion.svg>
+      <motion.svg viewBox="0 0 500 200">
+  <motion.path
+    d="M0,100 C50,30 100,170 150,70 S250,130 300,90 S350,150 400,80 S450,110 500,100"
+    stroke="#f59e0b"
+    strokeWidth={1.2}
+    fill="none"
+    initial={{ pathLength: 0 }}
+    animate={{
+      pathLength: 1,
+      d: [
+        "M0,100 C50,30 100,170 150,70 S250,130 300,90 S350,150 400,80 S450,110 500,100",
+        "M0,100 C50,170 100,30 150,130 S250,70 300,110 S350,50 400,120 S450,90 500,100"
+      ]
+    }}
+    transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
+  />
+</motion.svg>
 
         {/* Wave 2 */}
         <motion.svg 

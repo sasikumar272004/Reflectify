@@ -1,7 +1,7 @@
 // EmotionalAnalyzer.jsx
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
@@ -25,38 +25,50 @@ import {
 } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { RiMentalHealthLine } from "react-icons/ri";
+import { useEmotionData } from "../components/data/useEmotionData";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const EmotionalAnalyzer = () => {
-  // State management
-  const [activities, setActivities] = useState({
-    morning: "",
-    afternoon: "",
-    evening: "",
-    night: ""
-  });
-  const [analysis, setAnalysis] = useState(null);
+  // Use our custom hook to manage emotion data
+  const {
+    activities,
+    analysis,
+    history,
+    setActivities,
+    setAnalysis,
+    addToHistory,
+    clearHistory,
+    deleteHistoryItem
+  } = useEmotionData();
+
+  // Local component state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState(null);
-  const [activeTab, setActiveTab] = useState("analysis");
-  const [expandedSection, setExpandedSection] = useState(null);
-  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    analysis: true,
+    moodchanger: true,
+    activities: true
+  });
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+  
   const formRef = useRef(null);
-
+  const containerRef = useRef(null);
   const navigate = useNavigate();
 
-  // Load history from localStorage on component mount
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("emotionHistory")) || [];
-    setHistory(stored);
-  }, []);
+  // Scroll animations
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
+  
+  const yPos = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const yPos2 = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const yPos3 = useTransform(scrollYProgress, [0, 1], [30, -30]);
 
-  // Activity suggestions
+  // Activity suggestions data
   const activitySuggestions = {
     morning: [
       { icon: <FaRunning />, text: "Morning jog in the park" },
@@ -83,7 +95,7 @@ const EmotionalAnalyzer = () => {
   // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setActivities((prev) => ({ ...prev, [name]: value }));
+    setActivities(prev => ({ ...prev, [name]: value }));
   };
 
   // Handle suggestion selection
@@ -131,10 +143,7 @@ const EmotionalAnalyzer = () => {
         ...response.data,
       };
       
-      setAnalysis(newEntry);
-      const updatedHistory = [newEntry, ...history];
-      setHistory(updatedHistory);
-      localStorage.setItem("emotionHistory", JSON.stringify(updatedHistory));
+      addToHistory(newEntry);
     } catch (err) {
       setError(err.response?.data?.message || "Analysis failed. Please try again.");
       console.error("Analysis error:", err);
@@ -146,17 +155,14 @@ const EmotionalAnalyzer = () => {
   // Clear all history
   const handleClearHistory = () => {
     if (window.confirm("Are you sure you want to clear all history? This cannot be undone.")) {
-      setHistory([]);
-      localStorage.removeItem("emotionHistory");
+      clearHistory();
       setSelectedHistory(null);
     }
   };
 
   // Delete a single history item
   const handleDeleteHistoryItem = (id) => {
-    const updatedHistory = history.filter(item => item.id !== id);
-    setHistory(updatedHistory);
-    localStorage.setItem("emotionHistory", JSON.stringify(updatedHistory));
+    deleteHistoryItem(id);
     if (selectedHistory?.id === id) {
       setSelectedHistory(null);
     }
@@ -164,7 +170,10 @@ const EmotionalAnalyzer = () => {
 
   // Toggle section expansion
   const toggleSection = (section) => {
-    setExpandedSection(expandedSection === section ? null : section);
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   // Mood chart data configuration
@@ -184,28 +193,6 @@ const EmotionalAnalyzer = () => {
     ],
   };
 
-  // Weekly trend data (mock data - in a real app, this would come from your API)
-  const weeklyTrendData = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    datasets: [
-      {
-        label: "Positive",
-        data: [65, 59, 80, 81, 56, 55, 40],
-        backgroundColor: "#4ade80",
-      },
-      {
-        label: "Neutral",
-        data: [28, 48, 40, 19, 86, 27, 90],
-        backgroundColor: "#fbbf24",
-      },
-      {
-        label: "Negative",
-        data: [7, 13, 10, 5, 8, 18, 20],
-        backgroundColor: "#ef4444",
-      },
-    ],
-  };
-
   // Mood icons based on analysis
   const getMoodIcon = (mood) => {
     if (mood?.toLowerCase().includes("positive")) return <FaRegSmile className="text-green-500" />;
@@ -214,11 +201,74 @@ const EmotionalAnalyzer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-start justify-center p-4 md:p-8">
-      <div className="w-full max-w-7xl bg-white/90 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden">
+    <div 
+      ref={containerRef}
+      className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-start justify-center p-4 md:p-8 relative overflow-hidden"
+    >
+      {/* SVG Background Animations */}
+      <motion.svg 
+        viewBox="0 0 500 50" 
+        className="absolute top-[10%] left-0 w-full opacity-5"
+        style={{ y: yPos }}
+      >
+        <motion.path 
+          d="M0,25 C80,5 150,45 250,25 C350,5 420,45 500,25" 
+          stroke="#7c3aed" 
+          strokeWidth="1.5" 
+          fill="none" 
+          strokeDasharray="12 6"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 2, delay: 0.5 }}
+        />
+      </motion.svg>
+      
+      <motion.svg 
+        viewBox="0 0 500 100" 
+        className="absolute top-[30%] right-0 w-full opacity-5"
+        style={{ y: yPos2 }}
+      >
+        <motion.path 
+          d="M0,50 C150,10 300,90 500,50" 
+          stroke="#3b82f6" 
+          strokeWidth="1.5" 
+          fill="none" 
+          strokeDasharray="8 4"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 2.5, delay: 0.8 }}
+        />
+      </motion.svg>
+      
+      <motion.svg 
+        viewBox="0 0 500 80" 
+        className="absolute bottom-[20%] left-0 w-full opacity-5"
+        style={{ y: yPos3 }}
+      >
+        <motion.path 
+          d="M0,40 C100,0 200,80 300,40 C400,0 500,80 500,40" 
+          stroke="#10b981" 
+          strokeWidth="1.5" 
+          fill="none" 
+          strokeDasharray="10 5"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 3, delay: 0.3 }}
+        />
+      </motion.svg>
+
+      <div className="w-full max-w-7xl bg-white/90 backdrop-blur-lg rounded-3xl shadow-xl overflow-hidden z-10">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path 
+                d="M0,0 C20,50 40,30 60,70 S100,50 100,100 L100,0 Z" 
+                fill="black"
+              />
+            </svg>
+          </div>
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-3">
               <RiMentalHealthLine className="text-3xl" />
               <div>
@@ -249,7 +299,7 @@ const EmotionalAnalyzer = () => {
               transition={{ duration: 0.4 }}
               className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden"
             >
-              <div className="bg-gray-50 px-6 py-4 border-b">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
                 <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
                   <FaRegChartBar />
                   Daily Activities
@@ -320,7 +370,7 @@ const EmotionalAnalyzer = () => {
                     className={`w-full py-3 px-6 rounded-lg font-semibold shadow-md transition-all flex items-center justify-center gap-2 ${
                       loading
                         ? "bg-blue-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg"
+                        : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg"
                     } text-white`}
                   >
                     {loading ? (
@@ -358,7 +408,7 @@ const EmotionalAnalyzer = () => {
                   transition={{ duration: 0.4 }}
                   className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden"
                 >
-                  <div className="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
                       {getMoodIcon(selectedHistory?.mood || analysis?.mood)}
                       {selectedHistory ? "Past Analysis" : "Today's Analysis"}
@@ -380,15 +430,15 @@ const EmotionalAnalyzer = () => {
                   
                   <div className="p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-100">
                         <p className="text-sm text-blue-600 font-medium">Date</p>
                         <p className="text-gray-800">{selectedHistory?.date || analysis?.date}</p>
                       </div>
-                      <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-100">
                         <p className="text-sm text-green-600 font-medium">Overall Mood</p>
                         <p className="text-gray-800 font-medium">{selectedHistory?.mood || analysis?.mood}</p>
                       </div>
-                      <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-100">
                         <p className="text-sm text-purple-600 font-medium">Mood Score</p>
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-16">
@@ -440,48 +490,62 @@ const EmotionalAnalyzer = () => {
                       </div>
                     </div>
 
+                    {/* Expanded Analysis Sections */}
                     <div className="space-y-4">
-                      <div 
-                        className="cursor-pointer"
-                        onClick={() => toggleSection('analysis')}
-                      >
-                        <div className="flex justify-between items-center">
-                          <h3 className="font-medium text-gray-800">Behavior Analysis</h3>
-                          {expandedSection === 'analysis' ? <FaChevronUp /> : <FaChevronDown />}
+                      {/* Behavior Analysis */}
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200">
+                        <div 
+                          className="cursor-pointer"
+                          onClick={() => toggleSection('analysis')}
+                        >
+                          <div className="flex justify-between items-center">
+                            <h3 className="font-medium text-gray-800">Behavior Analysis</h3>
+                            {expandedSections.analysis ? <FaChevronUp /> : <FaChevronDown />}
+                          </div>
                         </div>
                         <AnimatePresence>
-                          {expandedSection === 'analysis' && (
-                            <motion.p
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="text-gray-600 mt-2 overflow-hidden"
-                            >
-                              {selectedHistory?.analysis || analysis?.analysis}
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </div>
-
-                      <div 
-                        className="cursor-pointer"
-                        onClick={() => toggleSection('moodchanger')}
-                      >
-                        <div className="flex justify-between items-center">
-                          <h3 className="font-medium text-gray-800">Mood Improvement Suggestions</h3>
-                          {expandedSection === 'moodchanger' ? <FaChevronUp /> : <FaChevronDown />}
-                        </div>
-                        <AnimatePresence>
-                          {expandedSection === 'moodchanger' && (
+                          {expandedSections.analysis && (
                             <motion.div
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: 'auto' }}
                               exit={{ opacity: 0, height: 0 }}
-                              className="mt-2 overflow-hidden"
+                              className="mt-3 overflow-hidden"
                             >
-                              <ul className="list-disc pl-5 space-y-2 text-gray-600">
+                              <div className="prose prose-sm max-w-none text-gray-600">
+                                {selectedHistory?.analysis || analysis?.analysis}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Mood Improvement Suggestions */}
+                      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 rounded-lg border border-indigo-200">
+                        <div 
+                          className="cursor-pointer"
+                          onClick={() => toggleSection('moodchanger')}
+                        >
+                          <div className="flex justify-between items-center">
+                            <h3 className="font-medium text-gray-800">Mood Improvement Suggestions</h3>
+                            {expandedSections.moodchanger ? <FaChevronUp /> : <FaChevronDown />}
+                          </div>
+                        </div>
+                        <AnimatePresence>
+                          {expandedSections.moodchanger && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="mt-3 overflow-hidden"
+                            >
+                              <ul className="space-y-3">
                                 {(selectedHistory?.moodchanger || analysis?.moodchanger)?.split('\n').map((item, i) => (
-                                  <li key={i}>{item}</li>
+                                  <li key={i} className="flex items-start gap-3">
+                                    <span className="flex-shrink-0 mt-1 text-indigo-500">
+                                      <FaRegLightbulb />
+                                    </span>
+                                    <span className="text-gray-600">{item}</span>
+                                  </li>
                                 ))}
                               </ul>
                             </motion.div>
@@ -489,27 +553,36 @@ const EmotionalAnalyzer = () => {
                         </AnimatePresence>
                       </div>
 
-                      <div 
-                        className="cursor-pointer"
-                        onClick={() => toggleSection('activities')}
-                      >
-                        <div className="flex justify-between items-center">
-                          <h3 className="font-medium text-gray-800">Logged Activities</h3>
-                          {expandedSection === 'activities' ? <FaChevronUp /> : <FaChevronDown />}
+                      {/* Logged Activities */}
+                      <div className="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-lg border border-green-200">
+                        <div 
+                          className="cursor-pointer"
+                          onClick={() => toggleSection('activities')}
+                        >
+                          <div className="flex justify-between items-center">
+                            <h3 className="font-medium text-gray-800">Logged Activities</h3>
+                            {expandedSections.activities ? <FaChevronUp /> : <FaChevronDown />}
+                          </div>
                         </div>
                         <AnimatePresence>
-                          {expandedSection === 'activities' && (
+                          {expandedSections.activities && (
                             <motion.div
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: 'auto' }}
                               exit={{ opacity: 0, height: 0 }}
-                              className="mt-2 overflow-hidden"
+                              className="mt-3 overflow-hidden"
                             >
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {Object.entries(selectedHistory?.activities || analysis?.activities || {}).map(([time, activity]) => (
-                                  <div key={time} className="bg-gray-50 p-3 rounded-lg">
-                                    <h4 className="capitalize font-medium text-gray-700">{time}</h4>
-                                    <p className="text-gray-600">{activity}</p>
+                                  <div key={time} className="bg-white/80 p-3 rounded-lg border border-green-100 shadow-xs">
+                                    <h4 className="capitalize font-medium text-gray-700 flex items-center gap-2">
+                                      {time === 'morning' && <FaRunning className="text-green-500" />}
+                                      {time === 'afternoon' && <FaUtensils className="text-yellow-500" />}
+                                      {time === 'evening' && <FaMusic className="text-purple-500" />}
+                                      {time === 'night' && <FaBook className="text-blue-500" />}
+                                      {time}
+                                    </h4>
+                                    <p className="text-gray-600 mt-1">{activity}</p>
                                   </div>
                                 ))}
                               </div>
@@ -527,7 +600,78 @@ const EmotionalAnalyzer = () => {
           {/* Right Column - Trends and History */}
           <div className="space-y-6">
             {/* Weekly Trends */}
-           
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b">
+                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                  <FaRegChartBar />
+                  Weekly Mood Trends
+                </h2>
+              </div>
+              <div className="p-4">
+                <div className="h-64">
+                  <Bar
+                    data={{
+                      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                      datasets: [
+                        {
+                          label: "Positive",
+                          data: [65, 59, 80, 81, 56, 55, 40],
+                          backgroundColor: "#4ade80",
+                          borderRadius: 4
+                        },
+                        {
+                          label: "Neutral",
+                          data: [28, 48, 40, 19, 86, 27, 90],
+                          backgroundColor: "#fbbf24",
+                          borderRadius: 4
+                        },
+                        {
+                          label: "Negative",
+                          data: [7, 13, 10, 5, 8, 18, 20],
+                          backgroundColor: "#ef4444",
+                          borderRadius: 4
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        x: {
+                          stacked: true,
+                          grid: {
+                            display: false
+                          }
+                        },
+                        y: {
+                          stacked: true,
+                          beginAtZero: true,
+                          ticks: {
+                            callback: function(value) {
+                              return value + '%';
+                            }
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: {
+                          position: 'bottom',
+                          labels: {
+                            usePointStyle: true,
+                            padding: 20
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </motion.div>
 
             {/* Tips Card */}
             <motion.div 
@@ -536,15 +680,22 @@ const EmotionalAnalyzer = () => {
               transition={{ duration: 0.4, delay: 0.3 }}
               className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl shadow-sm overflow-hidden"
             >
-              <div className="bg-blue-600/10 px-6 py-4 border-b border-blue-200">
+              <div className="bg-gradient-to-r from-blue-600/10 to-indigo-600/10 px-6 py-4 border-b border-blue-200">
                 <h2 className="text-xl font-semibold text-blue-800 flex items-center gap-2">
                   <FaRegLightbulb />
                   Wellness Tip
                 </h2>
               </div>
               <div className="p-6">
-                <p className="text-blue-800 font-medium mb-3">Morning mindfulness can set a positive tone for your day</p>
-                <p className="text-gray-600 text-sm">Try starting your day with 5 minutes of deep breathing or gratitude journaling to enhance emotional awareness.</p>
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 p-2 rounded-full text-blue-600">
+                    <FaRegLightbulb />
+                  </div>
+                  <div>
+                    <p className="text-blue-800 font-medium mb-2">Morning mindfulness can set a positive tone for your day</p>
+                    <p className="text-gray-600 text-sm">Try starting your day with 5 minutes of deep breathing or gratitude journaling to enhance emotional awareness.</p>
+                  </div>
+                </div>
               </div>
             </motion.div>
 
@@ -558,7 +709,7 @@ const EmotionalAnalyzer = () => {
                   transition={{ duration: 0.3 }}
                   className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden"
                 >
-                  <div className="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
                       <FaClock />
                       Analysis History
