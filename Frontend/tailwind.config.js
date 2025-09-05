@@ -20,6 +20,11 @@ export default {
         'terracotta-700': '#854a3e',
         'sage-500': '#8a9b6e',
         'sage-600': '#738557'
+      },
+      boxShadow: {
+        'soft': '0 4px 20px -2px rgba(180, 180, 220, 0.3)',
+        'soft-lg': '0 6px 30px -4px rgba(180, 180, 220, 0.4)',
+        'soft-xs': '0 2px 10px -1px rgba(180, 180, 220, 0.2)'
       }
     },
   },

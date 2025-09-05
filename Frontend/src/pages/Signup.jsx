@@ -7,7 +7,7 @@ import { FaUser, FaEnvelope, FaLock, FaArrowRight } from 'react-icons/fa';
 import { RiEyeLine, RiEyeOffLine } from 'react-icons/ri';
 import { IoMdCheckmarkCircleOutline } from 'react-icons/io';
 import 'react-toastify/dist/ReactToastify.css';
-import Particles from 'react-tsparticles';
+import Particles from "@tsparticles/react";
 import { loadFull } from 'tsparticles';
 
 const Signup = () => {

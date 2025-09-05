@@ -4,17 +4,12 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorMiddleware");
-const authRoutes =  require("./routes/authRoutes")
- 
+const authRoutes =  require("./routes/authRoutes") 
 const airoute = require("./routes/aiRoutes")
-
-
 const bodyParser = require('body-parser'); 
 const app = express();
 app.use(express.json()); // Required to parse JSON body
 app.use(express.urlencoded({ extended: true })); // Optional, for URL-encoded data
-
-
 
 
 // Connect to MongoDB
@@ -31,9 +26,7 @@ app.use(cors({
 app.use("/api/auth", authRoutes ); 
 app.use("/api/ai", airoute);
 
-app.get("/hi", (req, res) => {
-    res.send("Hello, World!");
-});
+ 
 // Global Error Handler
 app.use(errorHandler);
 

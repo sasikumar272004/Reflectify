@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 
 // Components
-import Navbar from "../components/layout/Navbar";
-import MobileMenu from "../components/layout/MobileMenu";
-import Footer from "../components/layout/Footer";
-import BackToTop from "../components/ui/BackToTop";
-import Hero from "../components/sections/Hero";
-import EmotionalAnalysis from "../components/sections/EmotionalAnalysis";
-import ExpenseInsights from "../components/sections/ExpenseInsights";
-import Transformation from "../components/sections/Transformation";
+import Navbar from "../components/layout/ui/Navbar";
+import MobileMenu from "../components/layout/ui/MobileMenu";
+import Footer from "../components/layout/ui/Footer";
+import BackToTop from "../components/layout/ui/BackToTop";
+import Hero from "../components/layout/sections/Hero";
+import EmotionalAnalysis from "../components/layout/sections/EmotionalAnalysis";
+import ExpenseInsights from "../components/layout/sections/ExpenseInsights";
+
 
 
 const Home = () => {
@@ -86,9 +86,8 @@ const Home = () => {
       
       <Hero navigate={navigate} />
       <EmotionalAnalysis navigate={navigate} />
-      <ExpenseInsights navigate={navigate} />
-      <Transformation />
-      
+      <ExpenseInsights navigate={navigate}/>
+        
       
       <Footer />
       <BackToTop />

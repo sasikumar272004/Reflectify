@@ -13,10 +13,10 @@ import { TbMoodHappy, TbMoodNeutral, TbMoodSad } from "react-icons/tb";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { BiChevronRight } from "react-icons/bi";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import Sidebar  from "../components/ProfileSub/sideBar";
-import EmotionInfo from "../components/ProfileSub/EmotionInfo";
-import ExpenseInfo from "../components/ProfileSub/expenseinfo";
-import Settings from "../components/ProfileSub/Setttings";
+import Sidebar  from "../components/layout/ProfileSub/sideBar";
+import EmotionInfo from "../components/layout/ProfileSub/EmotionInfo";
+import ExpenseInfo from "../components/layout/ProfileSub/expenseinfo";
+import Settings from "../components/layout/ProfileSub/Setttings";
 
 const Profile = () => {
   const navigate = useNavigate();

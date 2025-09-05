@@ -1,8 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Akaya+Kanadaka&family=Barriecito&family=Bitcount+Prop+Double:wght@100..900&family=Caveat:wght@400..700&family=Exo+2:ital,wght@0,100..900;1,100..900&family=Galindo&family=Gloria+Hallelujah&family=Jaini&family=Lakki+Reddy&family=Major+Mono+Display&family=Permanent+Marker&family=Playwrite+HU:wght@100..400&family=Poiret+One&family=Ponomar&family=Protest+Riot&family=Rock+Salt&family=Smooch+Sans:wght@100..900&family=Spicy+Rice&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Akaya+Kanadaka&family=Barriecito&family=Caveat:wght@400..700&family=Exo+2:ital,wght@0,100..900;1,100..900&family=Galindo&family=Gloria+Hallelujah&family=Jaini&family=Lakki+Reddy&family=Major+Mono+Display&family=Poiret+One&family=Ponomar&family=Protest+Riot&family=Rock+Salt&family=Smooch+Sans:wght@100..900&family=Spicy+Rice&display=swap');
-
 
 
 .money {
