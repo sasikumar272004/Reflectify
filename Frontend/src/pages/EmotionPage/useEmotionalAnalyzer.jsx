@@ -1,11 +1,17 @@
 // useEmotionalAnalyzer.js
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useEmotionData } from "../../components/data/useEmotionData";
 
 export const useEmotionalAnalyzer = () => {
+  // Load initial state from localStorage
+  const loadInitialState = () => {
+    const savedEmotions = localStorage.getItem('emotions');
+    return savedEmotions ? JSON.parse(savedEmotions) : [];
+  };
+
   // Use our custom hook to manage emotion data
   const {
     activities,
@@ -43,6 +49,13 @@ export const useEmotionalAnalyzer = () => {
   const yPos = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const yPos2 = useTransform(scrollYProgress, [0, 1], [50, -50]);
   const yPos3 = useTransform(scrollYProgress, [0, 1], [30, -30]);
+
+  // Save to localStorage whenever history changes
+  useEffect(() => {
+    if (history && history.length > 0) {
+      localStorage.setItem('emotions', JSON.stringify(history));
+    }
+  }, [history]);
 
   // Activity suggestions data
   const activitySuggestions = {

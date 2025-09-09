@@ -40,6 +40,12 @@ export const useExpenseTracker = () => {
   const [monthlyEarning, setMonthlyEarning] = useState(initialState.monthlyEarning);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+
+  const viewHistory = () => {
+    setShowDailyLogs(true);
+    setShowHistory(true);
+  };
 
   const categories = [
     "Food", "Transportation", "Housing", 
@@ -48,6 +54,15 @@ export const useExpenseTracker = () => {
   ];
 
   // Save data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+    localStorage.setItem('dailyExpenseLogs', JSON.stringify(dailyLogs));
+    localStorage.setItem('expenseSettings', JSON.stringify({
+      darkMode,
+      savingsGoal,
+      monthlyEarning
+    }));
+  }, [expenses, dailyLogs, darkMode, savingsGoal, monthlyEarning]);
   useEffect(() => {
     localStorage.setItem('expenses', JSON.stringify(expenses));
   }, [expenses]);

@@ -13,9 +13,9 @@ import { TbMoodHappy, TbMoodNeutral, TbMoodSad } from "react-icons/tb";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { BiChevronRight } from "react-icons/bi";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import Sidebar  from "../components/layout/ProfileSub/sideBar";
+import Sidebar  from "../components/layout/ProfileSub/SideBar";
 import EmotionInfo from "../components/layout/ProfileSub/EmotionInfo";
-import ExpenseInfo from "../components/layout/ProfileSub/expenseinfo";
+import ExpenseInfo from "../components/layout/ProfileSub/Expenseinfo";
 import Settings from "../components/layout/ProfileSub/Setttings";
 
 const Profile = () => {

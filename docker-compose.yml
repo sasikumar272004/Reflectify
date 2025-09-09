@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  backend:
+    build: ./Backend
+    container_name: backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./Backend/.env
+    restart: always
+    volumes:
+      - ./Backend:/app           # Optional: mount backend for live dev
+      - /app/node_modules        # Keep node_modules inside container
+
+  frontend:
+    build: ./Frontend
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: always
+    volumes:
+      - ./Frontend:/app          # Mount local code for live reload
+      - /app/node_modules        # Keep node_modules in container
+    command: npm run dev -- --host 0.0.0.0
