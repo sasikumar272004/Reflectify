@@ -16,7 +16,7 @@ connectDB();
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:5173',
   'http://localhost:5173', // Always allow local development
-  'https://reflectify-frontend.onrender.com' // Allow production URL
+  'https://reflectify-lqxs.onrender.com' // Allow production URL
 ];
 
 console.log('Allowed Origins:', allowedOrigins); // For debugging
