@@ -13,28 +13,33 @@ const app = express();
 connectDB();
 
 // Middleware
-const whitelist = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'https://reflectify-frontend.onrender.com',
-  'https://reflectify-frontend.vercel.app'
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://localhost:5173', // Always allow local development
+  'https://reflectify-frontend.onrender.com' // Allow production URL
 ];
+
+console.log('Allowed Origins:', allowedOrigins); // For debugging
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
     
-    if (whitelist.indexOf(origin) !== -1) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       console.log('Blocked by CORS:', origin);
-      callback(null, true); // Temporarily allow all origins while testing
+      // During development, you might want to allow all origins
+      callback(null, true); // Comment this line in production
+      // callback(new Error('Not allowed by CORS')); // Uncomment this line in production
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Access-Control-Allow-Origin'],
+  maxAge: 86400 // 24 hours
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
