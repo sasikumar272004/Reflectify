@@ -176,7 +176,7 @@ const Signup = () => {
         ? { email: formData.email, password: formData.password }
         : formData;
 
-      const response = await axios.post(`http://localhost:5000${endpoint}`, payload);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}${endpoint}`, payload);
       const { token, user } = response.data;
 
       localStorage.setItem('token', token);

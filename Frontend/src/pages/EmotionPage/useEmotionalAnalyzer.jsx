@@ -115,7 +115,7 @@ export const useEmotionalAnalyzer = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/ai/emotion",
+        `${import.meta.env.VITE_API_URL}/api/ai/emotion`,
         { prompt },
         {
           headers: {

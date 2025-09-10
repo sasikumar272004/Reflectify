@@ -212,7 +212,7 @@ export const useExpenseTracker = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/ai/expense",
+        `${import.meta.env.VITE_API_URL}/api/ai/expense`,
         { prompt },
         {
           headers: {
